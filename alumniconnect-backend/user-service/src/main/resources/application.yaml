@@ -1,0 +1,45 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/alumni_users_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: Shiv@5502
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        ddl-auto: update
+
+jwt:
+  # This MUST be 32+ characters long
+  secret: "alumniConnectSuperSecretKeyForJWTTokenGeneration2026"
+  expiration: 86400000 # 24 hours
+
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka/
+#  instance:
+#    # ✅ UPDATED: Added instance-id for clearer Eureka monitoring
+#    instance-id: ${spring.application.name}:${server.port}
+#    prefer-ip-address: true
+#    ip-address: 127.0.0.1
+#    hostname: localhost
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ # The URL where Eureka Server is running
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true # Recommended for Docker/containerized environments

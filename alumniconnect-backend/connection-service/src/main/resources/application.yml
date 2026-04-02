@@ -1,0 +1,41 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: connection-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/alumni_connections_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: Shiv@5502
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+jwt:
+  # This MUST be 32+ characters long
+  secret: "alumniConnectSuperSecretKeyForJWTTokenGeneration2026"
+  expiration: 86400000 # 24 hours
+
+# Notification service URL for inter-service calls
+notification:
+  service:
+    url: http://localhost:8084
+#notification:
+#  service:
+#    url: http://NOTIFICATION-SERVICE # 👈 Matches the name in Eureka
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ # The URL where Eureka Server is running
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true # Recommended for Docker/containerized environments

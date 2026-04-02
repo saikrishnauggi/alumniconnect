@@ -1,0 +1,52 @@
+package com.alumniconnect.userservice.config;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
+        return buildError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+        String errors = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return buildError(HttpStatus.BAD_REQUEST, errors);
+    }
+
+    // UPDATED: Now reveals the specific cause of 500 errors
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
+        String debugMessage = (ex.getCause() != null)
+                ? ex.getMessage() + " | Cause: " + ex.getCause().getMessage()
+                : ex.getMessage();
+
+        return buildError(HttpStatus.INTERNAL_SERVER_ERROR, "DEBUG: " + debugMessage);
+    }
+
+    private ResponseEntity<Map<String, Object>> buildError(HttpStatus status, String message) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", status.value());
+        body.put("error", message);
+
+        // Helpful tip: Print to console so you see it in IntelliJ too
+        System.err.println("Exception Intercepted: " + message);
+
+        return ResponseEntity.status(status).body(body);
+    }
+}

@@ -1,0 +1,29 @@
+server:
+  port: 8761
+  # ✅ ADDED: Binds the Discovery Server strictly to localhost
+  address: 127.0.0.1
+
+spring:
+  application:
+    name: DISCOVERY-SERVER
+  cloud:
+    compatibility-verifier:
+      # ✅ MANDATORY: Prevents Boot 3.4.3 / Cloud 2023.0.3 startup crash
+      enabled: false
+
+eureka:
+  instance:
+    hostname: localhost
+    # ✅ ADDED: Standardized ID format for consistency
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+  client:
+    # Since this IS the server, it shouldn't register with itself
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka/
+  server:
+    # Prevents the server from waiting to sync with others on startup
+    wait-time-in-ms-when-sync-empty: 0

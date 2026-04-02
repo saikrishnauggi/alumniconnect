@@ -1,0 +1,68 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "http://localhost:5173"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      routes:
+        # ✅ Auth (NO JWT)
+        - id: user-service-auth
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+
+        # ✅ Protected routes
+        - id: profile-service
+          uri: lb://PROFILE-SERVICE
+          predicates:
+            - Path=/api/profiles/**
+          filters:
+            - StripPrefix=1
+            - name: JwtAuthFilter
+
+        - id: connection-service
+          uri: lb://CONNECTION-SERVICE
+          predicates:
+            - Path=/api/connections/**
+          filters:
+            - StripPrefix=1
+            - name: JwtAuthFilter
+
+        - id: notification-service
+          uri: lb://NOTIFICATION-SERVICE
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=1
+            - name: JwtAuthFilter
+
+jwt:
+  # This MUST be 32+ characters long
+  secret: "alumniConnectSuperSecretKeyForJWTTokenGeneration2026"
+  expiration: 86400000 # 24 hours
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/ # The URL where Eureka Server is running
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    instance-id: ${spring.application.name}:${server.port}
+    prefer-ip-address: true
+
